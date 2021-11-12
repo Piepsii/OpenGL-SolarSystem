@@ -1,39 +1,53 @@
 // main.cpp
 
-#include <math.h>
-#include <stdio.h>
-#include <assert.h>
-
+#include <cstdio>
+#include <cassert>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 struct vertex {
     float x, y, z;
+    float r, g, b, a;
+};
+
+const vertex triangle[] = {
+    { 0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 0.0f, 1.0f },
+    { 1.0f,  -1.0f, 0.0f,    0.0f, 1.0f, 0.0f, 1.0f },
+    { -1.0f, -1.0f, 0.0f,    0.0f, 0.0f, 1.0f, 1.0f },
 };
 
 const char* glsl_vertex = R"(
 #version 330
 
 layout (location = 0) in vec3 a_position;
+layout (location = 1) in vec4 a_color;
+
+out vec4 v_color;
 
 void main(){
     gl_Position = vec4(a_position, 1);
+    v_color = a_color;
 }
 )";
 
 const char* glsl_fragment = R"(
 #version 330
 
+in vec4 v_color;
 out vec4 final_color;
 
 void main(){
-    final_color = vec4(1, 0, 0, 1);
+    final_color = v_color;
 }
 )";
 
 int main(int argc, char **argv)
 {
+    glfwSetErrorCallback([](int code, const char* message) {
+        printf("!!! %s (%d)\n", message, code);
+    });
+
    if (!glfwInit()) {
       return 0;
    }
@@ -50,6 +64,12 @@ int main(int argc, char **argv)
    if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
        return 0;
    }
+
+   glfwSetKeyCallback(window, [](GLFWwindow* window, int keycode, int scancode, int action, int mods) {
+       if (keycode == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+           glfwSetWindowShouldClose(window, GLFW_TRUE);
+       }
+    });
 
    GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
    glShaderSource(vertex_shader_id, 1, &glsl_vertex, nullptr);
@@ -87,11 +107,6 @@ int main(int argc, char **argv)
        printf("!!! shader program error\n%s\n", program_error);
    }
 
-   const vertex triangle[] = {
-       {  0.0f,  1.0f, 0.0f, },
-       {  1.0f, -1.0f, 0.0f, },
-       { -1.0f, -1.0f, 0.0f, },
-   };
 
    GLuint vertex_array_id = 0;
    glGenVertexArrays(1, &vertex_array_id);
@@ -103,7 +118,12 @@ int main(int argc, char **argv)
    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
    glEnableVertexAttribArray(0);;
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
+
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(vertex), (void*)offsetof(vertex, a));
+
+   const int primitive_count = sizeof(triangle) / sizeof(triangle[0]);
 
    while (!glfwWindowShouldClose(window)) {
        int width = 0, height = 0;
@@ -115,7 +135,7 @@ int main(int argc, char **argv)
 
        glUseProgram(shader_program_id);
        glBindVertexArray(vertex_array_id);
-       glDrawArrays(GL_TRIANGLES, 0, 3);
+       glDrawArrays(GL_TRIANGLES, 0, primitive_count);
 
        glfwSwapBuffers(window);
        glfwPollEvents();
