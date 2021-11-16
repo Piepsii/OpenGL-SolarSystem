@@ -5,6 +5,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+const static float PI = 3.141592f;
+const static float ASPECT = 16.0f / 9.0f;
+const static float NEAR = 1.0f;
+const static float FAR = 100.0f;
+
 
 struct vertex {
     float x, y, z;
@@ -12,6 +20,7 @@ struct vertex {
 };
 
 const vertex triangle[] = {
+    // position (x, y, z)    color (r, g, b, a)
     { 0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 0.0f, 1.0f },
     { 1.0f,  -1.0f, 0.0f,    0.0f, 1.0f, 0.0f, 1.0f },
     { -1.0f, -1.0f, 0.0f,    0.0f, 0.0f, 1.0f, 1.0f },
@@ -23,10 +32,13 @@ const char* glsl_vertex = R"(
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec4 a_color;
 
+uniform mat4 u_projection;
+uniform mat4 u_world;
+
 out vec4 v_color;
 
 void main(){
-    gl_Position = vec4(a_position, 1);
+    gl_Position = u_projection * u_world * vec4(a_position, 1);
     v_color = a_color;
 }
 )";
@@ -107,6 +119,12 @@ int main(int argc, char **argv)
        printf("!!! shader program error\n%s\n", program_error);
    }
 
+   const GLint projection_location = glGetUniformLocation(shader_program_id, "u_projection");
+   const GLint world_location = glGetUniformLocation(shader_program_id, "u_world");
+
+   glm::mat4 projection = glm::perspective(PI * 0.25f, ASPECT, NEAR, FAR);
+   glm::mat4 world = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.0f, -10.0f));
+   glm::mat4 world2 = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.0f, -11.0f));
 
    GLuint vertex_array_id = 0;
    glGenVertexArrays(1, &vertex_array_id);
@@ -129,13 +147,23 @@ int main(int argc, char **argv)
        int width = 0, height = 0;
        glfwGetFramebufferSize(window, &width, &height);
 
+       glClearDepth(1.0f);
        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
        glViewport(0, 0, width, height);
-       glClear(GL_COLOR_BUFFER_BIT);
+       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+       glEnable(GL_DEPTH_TEST);
 
        glUseProgram(shader_program_id);
+       glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
        glBindVertexArray(vertex_array_id);
+
+       glUniformMatrix4fv(world_location, 1, GL_FALSE, glm::value_ptr(world));
        glDrawArrays(GL_TRIANGLES, 0, primitive_count);
+
+       glUniformMatrix4fv(world_location, 1, GL_FALSE, glm::value_ptr(world2));
+       glDrawArrays(GL_TRIANGLES, 0, primitive_count);
+
 
        glfwSwapBuffers(window);
        glfwPollEvents();
