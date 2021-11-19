@@ -8,17 +8,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-const static float PI = 3.141592f;
-const static float ASPECT = 16.0f / 9.0f;
-const static float NEAR = 1.0f;
-const static float FAR = 100.0f;
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
-float rotationSpeed = 0.1f;
-float cursorPosX = 0.0f, cursorPosY = 0.0f;
 
 struct vertex {
     float x, y, z;
     float r, g, b, a;
+    float u, v;
 };
 
 struct Mesh {
@@ -28,52 +25,52 @@ struct Mesh {
 
 const vertex sixSidedCube[] = {
     // front
-    { 1.0f,  1.0f,  1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f, 1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
-    { 1.0f,  -1.0f, 1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
-    { 1.0f,  1.0f,  1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
-    { -1.0f,  1.0f, 1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f, 1.0f,    1.0f, 0.0f, 0.0f, 1.0f },
+    { 1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    0.0f, 1.0f },
+    { -1.0f, -1.0f, 1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    1.0f, 1.0f },
+    { 1.0f,  -1.0f, 1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    1.0f, 0.0f },
+    { 1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f,  1.0f, 1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    0.0f, 0.0f },
+    { -1.0f, -1.0f, 1.0f,    1.0f, 1.0f, 0.0f, 1.0f,    0.0f, 1.0f },
 
     // left
-    { -1.0f,  1.0f,  1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f,  1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f,  1.0f,  1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f,  1.0f, -1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, 0.0f, 1.0f },
+    { -1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
+    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f },
+    { -1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f,  1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 0.0f },
+    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
 
     // right
-    { 1.0f,  1.0f, -1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
-    { 1.0f, -1.0f,  1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
-    { 1.0f, -1.0f, -1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
-    { 1.0f,  1.0f, -1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
-    { 1.0f,  1.0f,  1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
-    { 1.0f, -1.0f,  1.0f,    0.0f, 0.0f, 1.0f, 1.0f },
+    { 1.0f,  1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
+    { 1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f },
+    { 1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { 1.0f,  1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { 1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 0.0f },
+    { 1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
 
     // back
-    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
-    { 1.0f,  1.0f,  -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
-    { 1.0f,  -1.0f, -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f,  1.0f, -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
-    { 1.0f,  1.0f,  -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
-    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 0.0f, 1.0f },
+    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
+    { 1.0f,  1.0f,  -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f },
+    { 1.0f,  -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f,  1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { 1.0f,  1.0f,  -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 0.0f },
+    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
 
     // top
-    {  1.0f, 1.0f, -1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
-    { -1.0f, 1.0f,  1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
-    {  1.0f, 1.0f,  1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
-    {  1.0f, 1.0f, -1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
-    { -1.0f, 1.0f, -1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
-    { -1.0f, 1.0f,  1.0f,    0.0f, 1.0f, 1.0f, 1.0f },
+    {  1.0f, 1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
+    { -1.0f, 1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f },
+    {  1.0f, 1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    {  1.0f, 1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f, 1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 0.0f },
+    { -1.0f, 1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
 
     // bottom
-    { -1.0f, -1.0f,  1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
-    {  1.0f, -1.0f, -1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
-    {  1.0f, -1.0f,  1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
-    { -1.0f, -1.0f, -1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
-    {  1.0f, -1.0f, -1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
-    { -1.0f, -1.0f,  1.0f,    1.0f, 0.0f, 1.0f, 1.0f },
+    { -1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
+    {  1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f },
+    {  1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    { -1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 0.0f },
+    {  1.0f, -1.0f, -1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 0.0f },
+    { -1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f },
 
 
 };
@@ -129,31 +126,109 @@ const vertex oneSidedCube[] = {
 
 
 };
+
+const static float PI = 3.141592f;
+const static float ASPECT = 1.0f / 1.0f;
+const static float NEAR = 1.0f;
+const static float FAR = 400.0f;
+
+float cursorPosX = 0.0f, cursorPosY = 0.0f;
+
+bool useRealMetrics = false;
+
+const int primitive_count = sizeof(sixSidedCube) / sizeof(sixSidedCube[0]);
+
+const float deltaTime = 0.00001f;
+const float AU = 24.0f;
+const float earthDiameter = AU / 23.481f;
+const float rotationRateEarth = deltaTime, orbitalPeriodEarth = rotationRateEarth * 365.0f;
+const float cameraDistance = -300.0f;
+
+glm::mat4 projection = glm::perspective(PI * 0.25f, ASPECT, NEAR, FAR);
+
+glm::mat4 world = glm::mat4(1.0f);
+
+class CelestialBody {
+public:
+    CelestialBody(float _rotationPeriod, float _orbitalPeriod, float _radius, float _semiMajorAxis, bool _isMoon = false)
+        : rotationPeriod(_rotationPeriod),
+          orbitalPeriod(_orbitalPeriod),
+          radius(_radius * earthDiameter),
+          semiMajorAxis(_semiMajorAxis * AU),
+          isMoon(_isMoon) {
+        rotation = 0.0f;
+        orbit = 0.0f;
+        rotationEarth = 0.0f;
+    };
+
+    void Update() {
+        rotation += rotationRateEarth / rotationPeriod;
+        orbit += orbitalPeriodEarth / orbitalPeriod;
+        if (isMoon) {
+            rotationEarth += rotationRateEarth;
+            space = glm::rotate(world, orbit, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f))) *
+                glm::translate(world, glm::vec3(AU, 0.0f, cameraDistance)) *
+                glm::rotate(world, rotationEarth, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f))) *
+                glm::translate(world, glm::vec3(semiMajorAxis, 0.0f, cameraDistance)) *
+                glm::rotate(world, rotation, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f))) *
+                glm::scale(world, glm::vec3(radius, radius, radius));
+        }
+        else {
+            space = glm::rotate(world, orbit, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f))) *
+                glm::translate(world, glm::vec3(semiMajorAxis, 0.0f, cameraDistance)) *
+                glm::rotate(world, rotation, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f))) *
+                glm::scale(world, glm::vec3(radius, radius, radius));
+        }
+    }
+
+    void Draw(GLint _world_location, int _primitive_count) {
+        glUniformMatrix4fv(_world_location, 1, GL_FALSE, glm::value_ptr(space));
+        glDrawArrays(GL_TRIANGLES, 0, _primitive_count);
+    }
+
+    glm::mat4 GetSpace() {
+        return space;
+    }
+
+private:
+    float rotation, orbit;
+    float rotationPeriod, orbitalPeriod, radius, semiMajorAxis;
+    bool isMoon;
+    float rotationEarth;
+    glm::mat4 space;
+};
+
 const char* glsl_vertex = R"(
 #version 330
 
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec4 a_color;
+layout (location = 2) in vec2 a_texcoord;
 
 uniform mat4 u_projection;
 uniform mat4 u_world;
 
 out vec4 v_color;
+out vec2 v_texcoord;
 
 void main(){
     gl_Position = u_projection * u_world * vec4(a_position, 1);
     v_color = a_color;
+    v_texcoord = a_texcoord;
 }
 )";
 
 const char* glsl_fragment = R"(
 #version 330
 
+uniform sampler2D u_diffuse;
+
 in vec4 v_color;
+in vec2 v_texcoord;
 out vec4 final_color;
 
 void main(){
-    final_color = v_color;
+    final_color = texture(u_diffuse, v_texcoord) * v_color;
 }
 )";
 
@@ -171,7 +246,7 @@ int main(int argc, char **argv)
 
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   GLFWwindow* window = glfwCreateWindow(1920, 1080, "Cube", nullptr, nullptr);
+   GLFWwindow* window = glfwCreateWindow(1200, 1200, "Solar System", nullptr, nullptr);
    if (window == nullptr) {
        return 0;
    }
@@ -186,16 +261,11 @@ int main(int argc, char **argv)
        if (keycode == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
            glfwSetWindowShouldClose(window, GLFW_TRUE);
        }
+       else if (keycode == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
+           useRealMetrics = true;
+       }
     });
 
-   glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-       rotationSpeed += (float)(yoffset / 1000.0);
-       });
-
-   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-       cursorPosX = ((float)xpos / 1920.0f - 0.5f) * 2.0f;
-       cursorPosY = ((float)ypos / 1080.0f - 0.5f) * 2.0f;
-   });
    /*------------------------------------------------WINDOW---------------------------------------------*/
 
    /*------------------------------------------------SHADER---------------------------------------------*/
@@ -261,6 +331,9 @@ int main(int argc, char **argv)
    glEnableVertexAttribArray(1);
    glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(vertex), (void*)offsetof(vertex, r));
 
+   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u)); 
+
    // Cube 2
    GLuint vertex_array_id2 = 1;
    glGenVertexArrays(1, &vertex_array_id2);
@@ -277,8 +350,36 @@ int main(int argc, char **argv)
    glEnableVertexAttribArray(1);
    glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(vertex), (void*)offsetof(vertex, r));
 
-   const int primitive_count = sizeof(sixSidedCube) / sizeof(sixSidedCube[0]);
-   float rotation = 0.0f;
+   int image_width = 0, image_height = 0, image_components = 0;
+   auto image_data = stbi_load("data/gravel.png", &image_width, &image_height, &image_components, STBI_rgb_alpha);
+   assert(image_data);
+
+
+   GLuint texture_id = 0;
+   glGenTextures(1, &texture_id);
+   glBindTexture(GL_TEXTURE_2D, texture_id);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+   stbi_image_free(image_data);
+
+   GLuint sampler_id = 0;
+   glGenSamplers(1, &sampler_id);
+   glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glSamplerParameteri(sampler_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+   glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+   float time = 0.0f;
+
+   CelestialBody sunBody = CelestialBody(1000.0f, 1000.0f, 2.0f, 0.0f);
+   CelestialBody mercuryBody = CelestialBody(58.65f, 0.24f, 0.383f, 0.39f);
+   CelestialBody venusBody = CelestialBody(58.65f, 0.62f, 0.949f, 0.72f);
+   CelestialBody earthBody = CelestialBody(1.0f, 1.0f, 1.0f, 1.0f);
+   CelestialBody moonBody = CelestialBody(29.53f, 0.0027f, 0.2725f, 0.00257f, true);
+   CelestialBody marsBody = CelestialBody(1.03f, 1.88f, 0.532f, 1.52f);
+   CelestialBody jupiterBody = CelestialBody(0.41f, 11.86f, 11.209f, 5.20f);
+   CelestialBody saturnBody = CelestialBody(0.44f, 29.45f, 9.449f, 9.54f);
+   CelestialBody uranusBody = CelestialBody(58.65f, 84.02f, 4.007f, 19.19f);
+   CelestialBody neptuneBody = CelestialBody(0.67f, 164.79f, 3.883f, 30.07f);
 
    /*------------------------------------------------MESHES---------------------------------------------*/
 
@@ -286,18 +387,21 @@ int main(int argc, char **argv)
        int width = 0, height = 0;
        glfwGetFramebufferSize(window, &width, &height);
 
-       rotation += rotationSpeed;
+       time += deltaTime;
 
-       glm::mat4 projection = glm::perspective(PI * 0.25f, ASPECT, NEAR, FAR);
-       glm::mat4 world[2];
-       world[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f + cursorPosX, 0.0f - cursorPosY, -7.0f)) *
-           glm::rotate(glm::mat4(1.0f), rotation, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f)));
-       world[1] = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f + cursorPosX, 0.0f - cursorPosY, -7.0f)) *
-           glm::rotate(glm::mat4(1.0f), rotation, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f)));
-
+       sunBody.Update();
+       mercuryBody.Update();
+       venusBody.Update();
+       earthBody.Update();
+       moonBody.Update();
+       marsBody.Update();
+       jupiterBody.Update();
+       saturnBody.Update();
+       uranusBody.Update();
+       neptuneBody.Update();
 
        glClearDepth(1.0f);
-       glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
        glViewport(0, 0, width, height);
        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -310,13 +414,22 @@ int main(int argc, char **argv)
        glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
        glBindVertexArray(vertex_array_id);
 
-       glUniformMatrix4fv(world_location, 1, GL_FALSE, glm::value_ptr(world[0]));
-       glDrawArrays(GL_TRIANGLES, 0, primitive_count);
+       glBindTexture(GL_TEXTURE_2D, texture_id);
+       glBindSampler(0, sampler_id);
+
+       sunBody.Draw(world_location, primitive_count);
 
        glBindVertexArray(vertex_array_id2);
 
-       glUniformMatrix4fv(world_location, 1, GL_FALSE, glm::value_ptr(world[1]));
-       glDrawArrays(GL_TRIANGLES, 0, primitive_count);
+       mercuryBody.Draw(world_location, primitive_count);
+       venusBody.Draw(world_location, primitive_count);
+       earthBody.Draw(world_location, primitive_count);
+       moonBody.Draw(world_location, primitive_count);
+       marsBody.Draw(world_location, primitive_count);
+       jupiterBody.Draw(world_location, primitive_count);
+       saturnBody.Draw(world_location, primitive_count);
+       uranusBody.Draw(world_location, primitive_count);
+       neptuneBody.Draw(world_location, primitive_count);
 
 
        glfwSwapBuffers(window);
