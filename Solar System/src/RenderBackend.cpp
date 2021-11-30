@@ -387,9 +387,9 @@ bool Cubemap::Create(const TextureFormat format,
     const int32 height,
     const void* data[6])
 {
-    GLuint id = 0;
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    GLuint _id = 0;
+    glGenTextures(1, &_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
     for (int32 index = 0; index < 6; index++) {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index,
             0,
@@ -402,7 +402,7 @@ bool Cubemap::Create(const TextureFormat format,
             data[index]);
     }
 
-    id = id;
+    id = _id;
 
     return IsValid();
 }

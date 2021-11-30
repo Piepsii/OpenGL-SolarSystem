@@ -1,10 +1,6 @@
 // CelestialBody.cpp
 #include "CelestialBody.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-
 namespace SolarSystem {
 
     CelestialBody::CelestialBody() {
@@ -53,15 +49,15 @@ namespace SolarSystem {
 
     void CelestialBody::LoadTexture(const char* path)
     {
-        int image_width = 0, image_height = 0, image_components = 0;
-        auto image_data = stbi_load(path, &image_width, &image_height, &image_components, STBI_rgb_alpha);
-        assert(image_data);
+        //int image_width = 0, image_height = 0, image_components = 0;
+        //auto image_data = stbi_load(path, &image_width, &image_height, &image_components, STBI_rgb_alpha);
+        //assert(image_data);
 
-        glGenTextures(1, &texture_id);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        //assert(glGetError == GL_NO_ERROR);
-        stbi_image_free(image_data);
+        //glGenTextures(1, &texture_id);
+        //glBindTexture(GL_TEXTURE_2D, texture_id);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        //glGenerateMipmap(GL_TEXTURE_2D);
+        ////assert(glGetError == GL_NO_ERROR);
+        //stbi_image_free(image_data);
     }
 }
