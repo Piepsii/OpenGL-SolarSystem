@@ -1,9 +1,14 @@
 // main.cpp
 
 #pragma once
-#include "CelestialBody.h"
-#include "Shaders.h"
 
+#include "Spinach.h"
+
+int main(int argc, char** argv)
+{
+    Application{ "Spinach",1920,1080 }.Run();
+    return 0;
+}
 
 namespace SolarSystem {
     extern float cursorPosX, cursorPosY;
@@ -20,98 +25,6 @@ namespace SolarSystem {
 
     int Run(int argc, char** argv)
     {
-
-        /*------------------------------------------------WINDOW---------------------------------------------*/
-
-        glfwSetErrorCallback([](int code, const char* message) {
-            printf("!!! %s (%d)\n", message, code);
-            });
-
-        if (!glfwInit()) {
-            return 0;
-        }
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Solar System", nullptr, nullptr);
-        if (window == nullptr) {
-            return 0;
-        }
-
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
-        if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
-            return 0;
-        }
-
-        glfwSetKeyCallback(window, [](GLFWwindow* window, int keycode, int scancode, int action, int mods) {
-            if (keycode == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
-            }
-            else if (keycode == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
-                useRealMetrics = !useRealMetrics;
-            }
-            else if (keycode == GLFW_KEY_UP && action == GLFW_RELEASE) {
-                deltaTime += 0.000001f;
-            }
-            else if (keycode == GLFW_KEY_DOWN && action == GLFW_RELEASE) {
-                deltaTime -= 0.000001f;
-            }
-            });
-
-        glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-            mousePosX = (float)(xpos / (windowWidth / 8));
-            mousePosY = (float)(ypos / windowHeight);
-            });
-
-        glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-            cameraDistance += (float)yoffset;
-            });
-
-        /*------------------------------------------------WINDOW---------------------------------------------*/
-
-        /*------------------------------------------------SHADER---------------------------------------------*/
-
-
-        GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex_shader_id, 1, &glsl_vertex, nullptr);
-        glCompileShader(vertex_shader_id);
-
-        GLint compile_status = GL_TRUE;
-        glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &compile_status);
-        if (compile_status == GL_FALSE) {
-            GLchar shader_error[1024] = {};
-            glGetShaderInfoLog(vertex_shader_id, sizeof(shader_error), nullptr, shader_error);
-            printf("!!! vertex shader error:\n%s\n", shader_error);
-        }
-
-        GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment_shader_id, 1, &glsl_fragment, nullptr);
-        glCompileShader(fragment_shader_id);
-
-        glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &compile_status);
-        if (compile_status == GL_FALSE) {
-            GLchar shader_error[1024] = {};
-            glGetShaderInfoLog(fragment_shader_id, sizeof(shader_error), nullptr, shader_error);
-            printf("!!! fragment shader error:\n%s\n", shader_error);
-        }
-
-        GLuint shader_program_id = glCreateProgram();
-        glAttachShader(shader_program_id, vertex_shader_id);
-        glAttachShader(shader_program_id, fragment_shader_id);
-        glLinkProgram(shader_program_id);
-
-        GLint link_status = GL_TRUE;
-        glGetProgramiv(shader_program_id, GL_LINK_STATUS, &link_status);
-        if (link_status == GL_FALSE) {
-            GLchar program_error[1024] = {};
-            glGetProgramInfoLog(shader_program_id, sizeof(program_error), nullptr, program_error);
-            printf("!!! shader program error\n%s\n", program_error);
-        }
-
-
-        /*------------------------------------------------SHADER---------------------------------------------*/
-
         /*------------------------------------------------MESHES---------------------------------------------*/
 
         const GLint projection_location = glGetUniformLocation(shader_program_id, "u_projection");
@@ -214,17 +127,8 @@ namespace SolarSystem {
             for (int i = 0; i < 10; i++) {
                 bodies[i].Draw(world_location, primitive_count);
             }
-
-            glfwSwapBuffers(window);
-            glfwPollEvents();
         }
-
-        glfwTerminate();
 
         return 0;
     }
-}
-
-int main(int argc, char** argv) {
-    SolarSystem::Run(argc, argv);
 }

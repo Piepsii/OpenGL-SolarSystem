@@ -103,16 +103,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\vendor\glad\src\glad.c" />
+    <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\CelestialBody.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\RenderBackend.cpp" />
+    <ClCompile Include="src\RenderContext.cpp" />
+    <ClCompile Include="src\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\data\grass.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Settings.h" />
-    <ClInclude Include="src\CelestialBody.h" />
-    <ClInclude Include="src\Shaders.h" />
+    <ClInclude Include="include\Render.h" />
+    <ClInclude Include="include\Settings.h" />
+    <ClInclude Include="include\CelestialBody.h" />
+    <ClInclude Include="include\Shaders.h" />
+    <ClInclude Include="include\Spinach.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
