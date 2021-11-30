@@ -2,33 +2,34 @@
 
 #pragma once
 
-#include "Settings.h"
+#include <Utility.h>
+#include <Settings.h>
 
 namespace SolarSystem {
-
-    extern const float AU;
-    extern const float earthDiameter;
-    extern float rotationRateEarth, orbitalPeriodEarth;
-    extern glm::mat4 world, view;
-    extern bool useRealMetrics;
 
     class CelestialBody {
     public:
         CelestialBody();
 
-        void Create(float _rotationPeriod = 0.0f, float _orbitalPeriod = 0.0f, float _radius = 0.0f, float _semiMajorAxis = 0.0f, float _distance = 0.0f, const char* path = "", glm::mat4* _worldToOrbit = &view);
+        void Create(glm::mat4* _worldToOrbit, float _rotationPeriod = 0.0f, float _orbitalPeriod = 0.0f, float _radius = 0.0f, float _semiMajorAxis = 0.0f, float _distance = 0.0f, const char* path = "" );
         void Update();
-        void Draw(GLint _world_location, int _primitive_count);
+        void Draw(int32 _world_location, int _primitive_count);
 
 
         glm::mat4* GetSpace();
         void LoadTexture(const char* path);
 
+        const static bool useRealMetrics = false;
+        const float deltaTime = 0.00001f;
+        float rotationRateEarth = deltaTime , orbitalPeriodEarth = rotationRateEarth * 365.0f ;
     private:
+        float time{ 0.0f };
         float rotation, orbit;
         float rotationPeriod, orbitalPeriod, radius, semiMajorAxis, distance;
         glm::mat4 space;
         glm::mat4* worldToOrbit;
-        GLuint texture_id;
+        uint32 texture_id;
+        Texture texture;
+
     };
 }

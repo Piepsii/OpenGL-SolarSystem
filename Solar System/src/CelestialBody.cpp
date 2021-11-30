@@ -3,27 +3,44 @@
 
 namespace SolarSystem {
 
-    CelestialBody::CelestialBody() {
+    CelestialBody::CelestialBody()
+    : rotation(0.0f),
+      orbit(0.0f),
+      rotationPeriod(0.0f),
+      orbitalPeriod(0.0f),
+      radius(1.0f),
+      semiMajorAxis(1.0f),
+      distance(1.0f),
+      worldToOrbit(nullptr),
+      texture_id(0)
+    {
         rotation = 0.0f;
         orbit = 0.0f;
         space = glm::mat4(0.0f);
     };
 
-    void CelestialBody::Create(float _rotationPeriod, float _orbitalPeriod, float _radius, float _semiMajorAxis, float _distance, const char* path, glm::mat4* _worldToOrbit) {
+    void CelestialBody::Create(glm::mat4* _worldToOrbit, float _rotationPeriod, float _orbitalPeriod, float _radius, float _semiMajorAxis, float _distance, const char* path) {
         rotationPeriod = _rotationPeriod;
         orbitalPeriod = _orbitalPeriod;
         radius = _radius * earthDiameter;
         semiMajorAxis = _semiMajorAxis * AU;
         distance = _distance;
-        worldToOrbit = _worldToOrbit;
         texture_id = 0;
         LoadTexture(path);
     }
 
     void CelestialBody::Update() {
+        time += deltaTime;
+
+        rotationRateEarth = deltaTime;
+        orbitalPeriodEarth = rotationRateEarth * 365.0f;
+
         rotation += rotationRateEarth / rotationPeriod;
         orbit += orbitalPeriodEarth / orbitalPeriod;
 
+        glm::mat4 world = glm::mat4(1.0f);
+        if (!worldToOrbit)
+            worldToOrbit = &world;
         if (useRealMetrics) {
             space = glm::rotate(*worldToOrbit, orbit, glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f))) *
                 glm::translate(world, glm::vec3(semiMajorAxis, 0.0f, 0.0f)) *
@@ -37,10 +54,10 @@ namespace SolarSystem {
         }
     }
 
-    void CelestialBody::Draw(GLint _world_location, int _primitive_count) {
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glUniformMatrix4fv(_world_location, 1, GL_FALSE, glm::value_ptr(space));
-        glDrawArrays(GL_TRIANGLES, 0, _primitive_count);
+    void CelestialBody::Draw(int32 _world_location, int _primitive_count) {
+        //glBindTexture(GL_TEXTURE_2D, texture_id);
+        //glUniformMatrix4fv(_world_location, 1, GL_FALSE, glm::value_ptr(space));
+        //glDrawArrays(GL_TRIANGLES, 0, _primitive_count);
     }
 
     glm::mat4* CelestialBody::GetSpace() {
@@ -49,15 +66,10 @@ namespace SolarSystem {
 
     void CelestialBody::LoadTexture(const char* path)
     {
-        //int image_width = 0, image_height = 0, image_components = 0;
-        //auto image_data = stbi_load(path, &image_width, &image_height, &image_components, STBI_rgb_alpha);
-        //assert(image_data);
-
-        //glGenTextures(1, &texture_id);
-        //glBindTexture(GL_TEXTURE_2D, texture_id);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        //glGenerateMipmap(GL_TEXTURE_2D);
-        ////assert(glGetError == GL_NO_ERROR);
-        //stbi_image_free(image_data);
+        if (!Utility::CreateTextureFromFile(texture,
+            path))
+        {
+            return;
+        }
     }
 }

@@ -1,6 +1,7 @@
 // Settings.h
 
 #pragma once
+
 #include <cstdio>
 #include <cassert>
 #include <glad/glad.h>
@@ -13,9 +14,6 @@
 #include <vector>
 
 namespace SolarSystem {
-
-
-
     struct vertex {
         float x, y, z;
         float r, g, b, a;
@@ -28,7 +26,7 @@ namespace SolarSystem {
         int m_count;
     };
 
-    const vertex sixSidedCube[36] = {
+    const vertex cube[36] = {
         // front
         {  1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f,  0.0f,  1.0f },
         { -1.0f,  1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    1.0f, 1.0f,     0.0f,  0.0f,  1.0f },
@@ -73,23 +71,8 @@ namespace SolarSystem {
         { -1.0f, -1.0f,  1.0f,    1.0f, 1.0f, 1.0f, 1.0f,    0.0f, 1.0f,     0.0f, -1.0f,  0.0f },
     };
 
-    const float PI = 3.141592f;
-    const float ASPECT = 1.0f / 1.0f;
-    const float NEAR = 1.0f;
-    const float FAR = 500.0f;
-    const int primitive_count = sizeof(sixSidedCube) / sizeof(sixSidedCube[0]);
-
+    const int primitive_count = sizeof(cube) / sizeof(cube[0]);
     const float AU = 12000.0f;
     const float earthDiameter = AU / 23481.f;
-    static float cursorPosX = 0.0f, cursorPosY = 0.0f;
-    static float deltaTime = 0.00001f;
-    static float cameraDistance = -50.0f;
-    static float mousePosX = 0.0f, mousePosY = 0.0f;
-    static int windowWidth = 720, windowHeight = 720;
-    static glm::mat4 projection = glm::perspective(PI * 0.4f, ASPECT, NEAR, FAR);
-
-    static float rotationRateEarth = deltaTime, orbitalPeriodEarth = rotationRateEarth * 365.0f;
-    static glm::mat4 world = glm::mat4(1.0f);
-    static glm::mat4 view = glm::mat4(1.0f);
-    static bool useRealMetrics = false;
+    const glm::vec3 cube_position = glm::vec3(0.0f, 0.0f, -5.0f);
 }

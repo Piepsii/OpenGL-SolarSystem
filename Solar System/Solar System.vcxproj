@@ -117,8 +117,8 @@
     <ClInclude Include="include\Render.h" />
     <ClInclude Include="include\Settings.h" />
     <ClInclude Include="include\CelestialBody.h" />
-    <ClInclude Include="include\Shaders.h" />
     <ClInclude Include="include\Spinach.h" />
+    <ClInclude Include="include\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
