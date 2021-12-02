@@ -161,6 +161,8 @@ void Application::Run() {
 	VertexLayout final_layout;
 	final_layout.AddAttribute(0, VertexLayout::ATTRIBUTE_FORMAT_FLOAT, 4, false);
 
+	bodies[4].SetSpaceToOrbit(bodies[3].GetSpacePtr());
+
 	while (running && context.PollEvents()) {
 		backend.SetFramebuffer(rendertarget);
 		backend.Clear(0.0f, 0.0f, 0.0f, 1.0f);
@@ -197,7 +199,6 @@ void Application::OnKey(int key, bool state) {
 }
 
 void Application::OnMouse(int x, int y) {
-
 }
 
 void Application::OnScroll(int xoffset, int yoffset) {

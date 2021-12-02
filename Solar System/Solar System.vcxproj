@@ -115,7 +115,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Render.h" />
-    <ClInclude Include="include\Settings.h" />
     <ClInclude Include="include\CelestialBody.h" />
     <ClInclude Include="include\Spinach.h" />
     <ClInclude Include="include\Utility.h" />

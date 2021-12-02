@@ -3,7 +3,6 @@
 #pragma once
 
 #include <Utility.h>
-#include <Settings.h>
 
 namespace SolarSystem {
 
@@ -24,22 +23,22 @@ namespace SolarSystem {
                   SamplerState& _linear_sampler);
 
 
-        glm::mat4* GetSpace();
+        glm::mat4* GetSpacePtr();
         void SetSpaceToOrbit(glm::mat4*_space);
         void SetOffset(int _offset);
         void SetCount(int _count);
         void LoadTexture(const char* path);
 
-        const float deltaTime = 0.00001f;
+        const float deltaTime = 0.0001f;
         float rotation_rate_earth = deltaTime , orbital_period_earth = rotation_rate_earth * 365.0f ;
     private:
         float time{ 0.0f };
         float rotation, orbit;
-        float rotation_period, orbital_period, distance;
+        float rotation_period, orbital_period, distance, tilt;
         glm::vec3 position;
-        glm::mat4 local_space, view_space;
-        glm::mat4 perspective, orthographic, world_space;
-        glm::mat4* space_to_orbit{&world_space};
+        glm::mat4 local_space;
+        glm::mat4 perspective, orthographic;
+        glm::mat4* space_to_orbit;
         Texture texture;
 
         int offset, count;
