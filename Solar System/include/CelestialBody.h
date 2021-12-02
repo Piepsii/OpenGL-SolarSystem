@@ -11,25 +11,38 @@ namespace SolarSystem {
     public:
         CelestialBody();
 
-        void Create(glm::mat4* _worldToOrbit, float _rotationPeriod = 0.0f, float _orbitalPeriod = 0.0f, float _radius = 0.0f, float _semiMajorAxis = 0.0f, float _distance = 0.0f, const char* path = "" );
+        void Create( float _rotationPeriod,
+                    float _orbitalPeriod,
+                    float _distance,
+                    const char* path);
         void Update();
-        void Draw(int32 _world_location, int _primitive_count);
+        void Draw(RenderBackend& _backend,
+                  Framebuffer& _rendertarget,
+                  ShaderProgram& _world_program,
+                  VertexBuffer& _vertex_buffer,
+                  VertexLayout& _vertex_layout,
+                  SamplerState& _linear_sampler);
 
 
         glm::mat4* GetSpace();
+        void SetSpaceToOrbit(glm::mat4*_space);
+        void SetOffset(int _offset);
+        void SetCount(int _count);
         void LoadTexture(const char* path);
 
-        const static bool useRealMetrics = false;
         const float deltaTime = 0.00001f;
-        float rotationRateEarth = deltaTime , orbitalPeriodEarth = rotationRateEarth * 365.0f ;
+        float rotation_rate_earth = deltaTime , orbital_period_earth = rotation_rate_earth * 365.0f ;
     private:
         float time{ 0.0f };
         float rotation, orbit;
-        float rotationPeriod, orbitalPeriod, radius, semiMajorAxis, distance;
-        glm::mat4 space;
-        glm::mat4* worldToOrbit;
-        uint32 texture_id;
+        float rotation_period, orbital_period, distance;
+        glm::vec3 position;
+        glm::mat4 local_space, view_space;
+        glm::mat4 perspective, orthographic, world_space;
+        glm::mat4* space_to_orbit{&world_space};
         Texture texture;
+
+        int offset, count;
 
     };
 }
