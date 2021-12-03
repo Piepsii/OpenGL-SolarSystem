@@ -29,7 +29,7 @@ namespace SolarSystem {
         void SetCount(int _count);
         void LoadTexture(const char* path);
 
-        const float deltaTime = 0.0001f;
+        const float deltaTime = 0.000001f;
         float rotation_rate_earth = deltaTime , orbital_period_earth = rotation_rate_earth * 365.0f ;
     private:
         float time{ 0.0f };

@@ -119,7 +119,7 @@ void Application::Run() {
 		FRAMEBUFFER_FORMAT_D32
 	};
 	Framebuffer rendertarget;
-	if (!rendertarget.Create(1920, 1080, 1, formats)) {
+	if (!rendertarget.Create(1920, 1080, 2, formats)) {
 		return;
 	}
 	ShaderProgram world_program;
