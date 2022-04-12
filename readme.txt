@@ -1,3 +1,4 @@
+Disclaimer: Not all code written in this repository is mine. The spinach framework was given to us by the teacher https://github.com/lippuu
 Course Name: Real-Time Graphics Programming for Games 1
 Course Code: 5SD805 54832 HT2021
 Student Name: Paul Brandstetter
